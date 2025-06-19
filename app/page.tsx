@@ -261,8 +261,8 @@ export default function Home() {
                 className="w-15 h-8 mt-2 bg-white text-black border-white"
                 value={maxTarget}
                 onChange={(e) => {
-                  try{setMaxTarget(Number(e.currentTarget.value))}
-                  catch{alert("bukan angka")};
+                  try { setMaxTarget(Number(e.currentTarget.value)) }
+                  catch { alert("bukan angka") };
                 }}
               >
               </Input>
@@ -278,6 +278,18 @@ export default function Home() {
           </div>
         </>
       }
+      {!scope &&
+        <button
+          onClick={() => { setScope(true) }}
+          className="absolute w-10 h-10 bottom-0 left-0 m-[10px] bg-[black] text-white font-bold z-100">
+          E
+        </button>}
+      {scope &&
+        <button
+          onClick={() => { setScope(false) }}
+          className="absolute w-10 h-10 bottom-0 left-0 m-[10px] bg-[white] text-black font-bold z-100">
+          E
+        </button>}
       <button
         onClick={MissClick}
         className="absolute bg-transparent w-[3000px] h-[3000px] border-transparent overflow-hidden z-0"
