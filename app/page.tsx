@@ -1,7 +1,14 @@
 'use client'
 import { Input } from "@/components/ui/input";
+import { M_PLUS_1 } from "next/font/google";
 import Image from "next/image";
 import React, { ReactHTMLElement, useEffect, useRef, useState } from "react";
+
+interface StatsType {
+  Kills: number,
+  Misses: number,
+  Accuracy: number,
+}
 
 export default function Home() {
   const [position, setPosition] = useState<number[]>([0, 0]);
@@ -17,6 +24,7 @@ export default function Home() {
   // x-axis, y-axis, random, velocity
   const [input, setInput] = useState<number[]>([0, 0, 0, 0]);
   const inputString = ['x-axis', 'y-axis', 'random', 'velocity'];
+  const [stats, setStats] = useState<StatsType>({ Kills: 0, Misses: 0, Accuracy: 1 });
 
   function aktif(i: number) {
     let baru: number[] = [...input]
@@ -44,6 +52,23 @@ export default function Home() {
       </div>
     )
   }
+
+  const Stats = Object.entries(stats).map(([key, value]) => {
+    let val = value;
+    let persen: string = "";
+    if (key == "Accuracy") {
+      val *= 100;
+      persen = "%";
+    }
+
+    return (
+      <div key={key} className="flex grid-cols-2 gap-1">
+        <h1 className="left-0 top-0 m-[10px] text-black font-bold text-[20px]">
+          {key}:&nbsp;{Math.round(val)}{persen}
+        </h1>
+      </div>
+    )
+  })
 
   function getRandom(x: number) {
     return Math.floor(Math.random() * x);
@@ -117,27 +142,79 @@ export default function Home() {
 
   const mati = () => {
     if (scope) {
+      let b: StatsType = stats;
+      b.Kills++;
+      b.Accuracy = b.Kills / (b.Kills + b.Misses);
+      setStats(b);
       setHidup(false);
     }
   }
 
   const handleChange = (e: React.FormEvent<HTMLInputElement>) => {
-    try{
+    try {
       setV(Number(e.currentTarget.value));
-    }catch{
+    } catch {
       alert("bukan angka")
+    }
+  }
+
+  const MissClick = () => {
+    if (scope && hidup) {
+      let b: StatsType = stats;
+      b.Misses++;
+      setStats(b);
     }
   }
 
   return (
     <div className={`fixed top-0 left-0 w-screen h-screen bg-blue-200 overflow-hidden ${scope ? "cursor-none" : ""}`}>
+      {!scope &&
+        <>
+          <h1 className="absolute left-0 top-0 m-[10px] text-black font-bold text-[20px] z-20">
+            Press E to activate the scope
+          </h1>
+
+          <div className="absolute top-[40px] bg-transparent m-[10px] grid-rows-4 border-[black] border-5 w-[280px] h-auto z-20">
+            {InputK(2)}
+            {!input[2] && InputK(0)}
+            {!input[2] && InputK(1)}
+            <div className="flex grid-cols-2 gap-1">
+              <h1 className="left-0 top-0 m-[10px] text-black font-bold text-[20px]">
+                velocity:
+              </h1>
+              <Input
+                className="w-15 h-8 mt-2 bg-white text-black border-white"
+                value={v}
+                onChange={(e) => handleChange(e)}
+              >
+              </Input>
+            </div>
+          </div>
+          
+          <h1 className="absolute top-0 right-0 mr-[200px] m-[10px] text-black font-bold text-[20px]">
+            Statistics
+          </h1>
+
+          <div className="absolute right-0 top-[40px] bg-transparent m-[10px] border-[black] border-5 w-[280px] h-auto">
+            <>{Stats}</>
+          </div>
+        </>
+      }
+      <button
+        onClick={MissClick}
+        className="absolute bg-transparent w-[3000px] h-[3000px] border-transparent overflow-hidden z-0"
+        style={{
+          userSelect: "none"
+        }}
+        >
+      </button>
       {scope &&
         <Image
           src="/scope2.png"
           alt="sLogo"
           width={5760}
           height={3240}
-          className="object-cover w-[5760] h-[3240] pointer-events-none fixed z-10"
+          className="object-cover w-[5760] h-[3240] pointer-events-none fixed z-60"
           style={
             {
               left: position[0],
@@ -150,7 +227,7 @@ export default function Home() {
 
       <button
         onMouseDown={mati}
-        className={`absolute rounded-full bg-red-800 w-10 h-10 ${hidup ? "" : "hidden"}`}
+        className={`absolute rounded-full bg-red-800 w-10 h-10 ${hidup ? "" : "hidden"} z-50`}
         style={
           {
             left: `${posisiTarget[0]}px`,
@@ -161,30 +238,6 @@ export default function Home() {
       >
 
       </button>
-      {!scope &&
-        <>
-          <h1 className="left-0 top-0 m-[10px] text-black font-bold text-[20px]">
-            Press E to activate the scope
-          </h1>
-
-          <div className="bg-transparent m-[10px] grid-rows-4 border-[black] border-5 w-[280px] h-auto">
-            {InputK(2)}
-            {!input[2] && InputK(0)}
-            {!input[2] && InputK(1)}
-            <div className="flex grid-cols-2 gap-1">
-              <h1 className="left-0 top-0 m-[10px] text-black font-bold text-[20px]">
-                velocity:
-              </h1>
-              <Input 
-                className="w-15 h-8 mt-2 bg-white text-black border-white"
-                value={v}
-                onChange={(e) => handleChange(e)}
-                >
-              </Input>
-            </div>
-          </div>
-        </>
-      }
     </div>
   );
 }
